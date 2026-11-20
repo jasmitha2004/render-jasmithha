@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ContextBridge AI — Yellow & Black Preview</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #080808;
+      --surface: #101010;
+      --ink: #fafafa;
+      --muted: #a3a3a3;
+      --border: #292929;
+      --accent: #FFD600;
+      --yellow: #FCEB00;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Inter, system-ui, sans-serif;
+      background: radial-gradient(ellipse at top, #202020 0%, #080808 55%);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+    }
+    .sidebar {
+      width: 260px;
+      background: linear-gradient(180deg, #000 0%, #101010 50%, #080808 100%);
+      border-right: 1px solid var(--border);
+      padding: 1.25rem 1rem;
+      flex-shrink: 0;
+    }
+    .sidebar h2 { color: var(--yellow); font-size: 1.1rem; margin-bottom: 0.35rem; }
+    .sidebar .user { color: #FFF6B8; font-size: 0.8rem; margin-bottom: 1.25rem; }
+    .nav a {
+      display: block;
+      color: #FFF6B8;
+      text-decoration: none;
+      padding: 0.45rem 0.7rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 0.15rem;
+    }
+    .nav a:hover, .nav a.active { background: rgba(255,214,0,0.15); color: var(--yellow); }
+    .main { flex: 1; max-width: 1200px; padding: 1.25rem 1.5rem 2.5rem; }
+    .hero {
+      background: linear-gradient(135deg, #000 0%, #202020 40%, #2B2400 100%);
+      border: 1px solid #FFD60055;
+      border-radius: 16px;
+      padding: 1.35rem 1.6rem;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 16px 40px -10px rgb(255 214 0 / 0.25);
+    }
+    .hero h1 { color: var(--yellow); font-size: 1.45rem; }
+    .hero p { color: #d4d4d4; margin-top: 0.3rem; font-size: 0.92rem; }
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 1.25rem;
+    }
+    .kpi {
+      background: linear-gradient(160deg, #171717, #101010);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.9rem 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #E6C000, #FCEB00);
+    }
+    .kpi .label { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .kpi .value { font-size: 1.55rem; font-weight: 700; color: var(--yellow); margin-top: 0.15rem; }
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.1rem 1.25rem;
+      box-shadow: 0 4px 20px rgb(0 0 0 / 0.45);
+    }
+    .card:hover { border-color: #FFD60055; }
+    .card h3 { color: #FFFBE0; font-size: 1rem; margin-bottom: 0.3rem; }
+    .card .meta { color: var(--muted); font-size: 0.85rem; }
+    .score {
+      display: flex; align-items: center; gap: 1.25rem; margin-top: 1rem;
+    }
+    .ring {
+      width: 100px; height: 100px; border-radius: 50%;
+      background: conic-gradient(#FFD600 180deg, #333 0);
+      display: grid; place-items: center;
+    }
+    .ring-inner {
+      width: 78px; height: 78px; border-radius: 50%;
+      background: #080808; color: var(--yellow);
+      display: grid; place-items: center; font-weight: 700; font-size: 1.3rem;
+    }
+    .badge {
+      display: inline-block; padding: 0.15rem 0.5rem; border-radius: 999px;
+      font-size: 0.72rem; font-weight: 600; background: #2B2400; color: #FCEB00;
+    }
+    .btn {
+      display: inline-block; margin-top: 1rem;
+      background: linear-gradient(135deg, #B89B00, #FFD600);
+      color: #080808; font-weight: 600; border: none;
+      padding: 0.55rem 1.2rem; border-radius: 9px; cursor: pointer;
+    }
+    .note { margin-top: 1.5rem; color: var(--muted); font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <h2>ContextBridge</h2>
+    <div class="user">demo</div>
+    <nav class="nav">
+      <a class="active" href="#">Workspace overview</a>
+      <a href="#">Documents</a>
+      <a href="#">Decisions & tasks</a>
+      <a href="#">Knowledge gaps</a>
+      <a href="#">Knowledge graph</a>
+      <a href="#">Readiness</a>
+      <a href="#">AI assistant</a>
+      <a href="#">Reports</a>
+    </nav>
+  </aside>
+  <main class="main">
+    <div class="hero">
+      <h1>Workspace overview</h1>
+      <p>Knowledge continuity across your projects — yellow & black theme preview</p>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="label">Projects</div><div class="value">1</div></div>
+      <div class="kpi"><div class="label">Documents</div><div class="value">1</div></div>
+      <div class="kpi"><div class="label">Decisions</div><div class="value">3</div></div>
+      <div class="kpi"><div class="label">Tasks</div><div class="value">4</div></div>
+      <div class="kpi"><div class="label">Risks</div><div class="value">3</div></div>
+      <div class="kpi"><div class="label">Gaps</div><div class="value">3</div></div>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <h3>Apollo Enterprise Platform</h3>
+        <div class="meta">1 docs · 3 gaps</div>
+        <div class="score">
+          <div class="ring"><div class="ring-inner">50</div></div>
+          <div>
+            <div class="badge">readiness</div>
+            <p class="meta" style="margin-top:0.5rem;">Significant gaps remain before handover.</p>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Theme</h3>
+        <div class="meta">Black surfaces · yellow accent (#FFD600 / #FCEB00)</div>
+        <p style="margin-top:0.75rem;font-size:0.9rem;color:#d4d4d4;">
+          Sidebar, hero, KPI values, score ring, and primary actions use yellow on black.
+          This is a static preview of the Streamlit UI look.
+        </p>
+        <button class="btn">Primary action</button>
+      </div>
+    </div>
+    <p class="note">Static preview only. Run Streamlit for the full interactive app: <code>streamlit run frontend/app.py</code></p>
+  </main>
+</body>
+</html>

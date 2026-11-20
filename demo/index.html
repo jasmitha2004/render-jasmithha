@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ContextBridge AI — Live demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080808;--bg2:#101010;--card:#171717;--el:#202020;--y:#FFD600;--ey:#FCEB00;--mut:#A3A3A3;--bd:#292929;--red:#fca5a5;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:#fff;font:15px/1.55 Inter,system-ui,sans-serif}
+h1,h2,h3{font-family:'Space Grotesk',Inter,sans-serif;letter-spacing:-.02em;margin:0}
+button,input,textarea,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--y);outline-offset:2px}
+.btn{background:var(--y);color:#080808;border:0;border-radius:999px;padding:10px 20px;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--ey)}.btn.g{background:none;color:#fff;border:1px solid var(--bd)}.btn.g:hover{border-color:var(--y)}
+input,textarea,select{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:11px 14px;width:100%}
+.login{min-height:100vh;display:grid;place-items:center;padding:20px}
+.lbox{width:100%;max-width:400px;background:var(--card);border:1px solid var(--bd);border-radius:24px;padding:32px}
+.lbox h1{font-size:30px;margin-bottom:6px}.lbox label{display:block;margin:16px 0 6px;color:var(--mut);font-size:13px}
+.hint{margin-top:18px;padding:12px 14px;background:var(--bg2);border-left:3px solid var(--y);border-radius:0 10px 10px 0;font-size:13px;color:var(--mut)}
+.err{color:var(--red);font-size:13px;margin-top:10px;min-height:18px}
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+aside{background:#000;border-right:1px solid var(--bd);padding:20px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:4px}
+.logo{font:700 18px 'Space Grotesk';padding:4px 10px 18px}
+.nav{background:none;border:0;text-align:left;padding:10px 12px;border-radius:10px;color:var(--mut);cursor:pointer}
+.nav:hover{color:#fff;background:var(--bg2)}.nav[aria-current=page]{background:var(--el);color:var(--y);box-shadow:inset 3px 0 var(--y)}
+main{padding:32px clamp(18px,4vw,48px);max-width:1100px;width:100%}
+main h2{font-size:32px;margin-bottom:6px}.sub{color:var(--mut);margin:0 0 24px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:20px}
+.kpi b{display:block;font:700 38px 'Space Grotesk';color:var(--ey);letter-spacing:-.03em}.kpi span{color:var(--mut);font-size:13px}
+.item{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+.item q{display:block;color:#d4d4d4;margin:6px 0;font-style:normal;border-left:3px solid var(--y);padding-left:10px;font-size:14px}
+.tag{display:inline-block;font-size:12px;padding:2px 10px;border-radius:999px;border:1px solid var(--bd);color:var(--mut);margin-right:6px}
+.tag.hi{color:var(--red);border-color:#7f1d1d}.tag.md,.tag.y{color:var(--y);border-color:rgba(255,214,0,.4)}.tag.ok{color:#6ee7b7;border-color:#065f46}
+.src{font-size:12px;color:var(--mut)}
+.drop{border:2px dashed var(--bd);border-radius:18px;padding:28px;text-align:center;color:var(--mut);cursor:pointer}.drop.on,.drop:hover{border-color:var(--y)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.chat{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
+.msg{max-width:82%;padding:12px 16px;border-radius:16px;background:var(--card);border:1px solid var(--bd)}.msg.u{align-self:flex-end;background:var(--y);color:#080808;border:0}
+.bar{height:8px;background:var(--bd);border-radius:8px;overflow:hidden;margin-top:6px}.bar i{display:block;height:100%;background:var(--y)}
+svg.gr{width:100%;height:520px;background:var(--bg2);border:1px solid var(--bd);border-radius:18px;touch-action:none;cursor:grab}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--el);border:1px solid var(--y);padding:10px 18px;border-radius:999px;display:none;z-index:9}
+pre{white-space:pre-wrap;background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:16px;font:13px/1.6 Inter;max-height:360px;overflow:auto}
+.top{display:none}
+@media(max-width:800px){.app{grid-template-columns:1fr}aside{position:static;height:auto;flex-direction:row;overflow-x:auto;padding:10px}.logo{display:none}.nav{white-space:nowrap}main{padding-top:20px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<div id="root"></div><div class="toast" id="toast" role="status"></div>
+<script>
+(function(){
+var S={user:null,page:'dash',docs:[],chat:[],sel:null,gf:'all',q:''};
+var SAMPLE=[
+['apollo_sprint_notes.txt',"Sprint review held on 4 March. We decided to move the API to a managed Postgres instance after the March freeze. Priya will migrate the nightly jobs to the new scheduler by March 14. Marcus agreed to delay the mobile launch by two sprints. The OCR vendor selection still needs sign-off and nobody owns it. Risk: only Dev can run the production release, a single point of failure. Dev should document the release steps. There is a concern that the payments audit may delay the launch."],
+['steering_minutes.docx.txt',"Steering committee approved the Q2 budget on 11 March. Marcus will write the payments audit checklist. Someone should share the vendor contact list. The team resolved to use weekly handover reviews. Blocker: no backup vendor has been discussed if the OCR vendor is rejected. We might miss the compliance deadline if legal review slips."]];
+var $=function(s,r){return(r||document).querySelector(s)};
+function esc(s){return String(s).replace(/[&<>"]/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]})}
+function toast(t){var e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(function(){e.style.display='none'},2800)}
+/* ---------- extraction (rule-based; labelled as such) ---------- */
+function sents(t){return t.split(/(?<=[.!?])\s+|\n+/).map(function(x){return x.trim()}).filter(function(x){return x.length>12})}
+function extract(name,text){var out={name:name,text:text,decisions:[],tasks:[],risks:[]};
+sents(text).forEach(function(s){
+var own=(s.match(/\b([A-Z][a-z]+)\s+(?:will|should|to|agreed|needs to|must)\b/)||[])[1];
+var due=(s.match(/\bby\s+((?:[A-Z][a-z]+\s+\d{1,2})|(?:\d{1,2}\s+[A-Z][a-z]+)|next\s+\w+|end of \w+)/)||[])[1];
+if(/\b(risk|blocker|concern|single point|no backup|might|may delay|may slip|delay)\b/i.test(s))out.risks.push({text:s,sev:/blocker|single point|only|no backup|critical/i.test(s)?'high':'medium',src:name});
+else if(/\b(decided|agreed|approved|resolved|chose)\b/i.test(s))out.decisions.push({text:s,by:/Steering|team/.test(s)?(s.match(/Steering committee|team/)||[''])[0]:(own||''),src:name});
+else if(/\b(will|should|must|needs? to|needs sign-off|nobody owns|someone should)\b/i.test(s))out.tasks.push({text:s,owner:/nobody|someone/i.test(s)?'':(own||''),due:due||'',src:name});
+});return out}
+function all(k){return S.docs.reduce(function(a,d){return a.concat(d[k])},[])}
+/* ---------- readiness ---------- */
+function pct(a,b){return b?Math.round(a/b*100):100}
+function ready(){var t=all('tasks'),d=all('decisions'),r=all('risks');
+var c={'Tasks with owners':pct(t.filter(function(x){return x.owner}).length,t.length),'Tasks with deadlines':pct(t.filter(function(x){return x.due}).length,t.length),'Decisions attributed':pct(d.filter(function(x){return x.by}).length,d.length),'Risk exposure (fewer high risks is better)':Math.max(0,100-r.filter(function(x){return x.sev==='high'}).length*25)};
+var v=Object.keys(c).map(function(k){return c[k]});var sc=S.docs.length?Math.round(v.reduce(function(a,b){return a+b},0)/v.length):0;
+var gaps=[];t.forEach(function(x){if(!x.owner)gaps.push('Task has no owner: '+x.text);if(!x.due)gaps.push('Task has no deadline: '+x.text)});d.forEach(function(x){if(!x.by)gaps.push('Decision has no named decider: '+x.text)});
+return{score:sc,c:c,gaps:gaps}}
+/* ---------- Q&A: local keyword retrieval ---------- */
+var STOP='the a an of to is are was were what who which when why how do does did for in on and or about with that this it be by we our have has any'.split(' ');
+function ask(q){var w=q.toLowerCase().replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(function(x){return x.length>2&&STOP.indexOf(x)<0});
+var hits=[];S.docs.forEach(function(d){sents(d.text).forEach(function(s){var l=s.toLowerCase(),n=w.filter(function(x){return l.indexOf(x)>-1}).length;if(n)hits.push({s:s,n:n,src:d.name})})});
+hits.sort(function(a,b){return b.n-a.n});return hits.slice(0,3)}
+/* ---------- views ---------- */
+function login(){return '<div class="login"><form class="lbox" id="lf"><h1>ContextBridge AI</h1><p class="sub" style="margin:0">Sign in to the live demo.</p><label for="u">Username</label><input id="u" autocomplete="username" value="demo"><label for="p">Password</label><input id="p" type="password" autocomplete="current-password" value="demo1234"><div class="err" id="er" role="alert"></div><button class="btn" style="width:100%;margin-top:8px">Sign in</button><div class="hint">Demo account: <b>demo</b> / <b>demo1234</b>. Your documents stay in this browser tab and are not sent anywhere.</div></form></div>'}
+var NAV=[['dash','Dashboard'],['docs','Documents'],['ask','AI Assistant'],['graph','Knowledge Graph'],['dec','Decisions & Tasks'],['risk','Risk Analysis'],['hand','Handover Report']];
+function shell(c){return '<div class="app"><aside><div class="logo">ContextBridge AI</div>'+NAV.map(function(n){return '<button class="nav" data-p="'+n[0]+'"'+(S.page===n[0]?' aria-current="page"':'')+'>'+n[1]+'</button>'}).join('')+'<div style="flex:1"></div><button class="nav" id="out">Sign out</button></aside><main>'+c+'</main></div>'}
+function tag(x){return '<span class="tag '+(x==='high'?'hi':x==='medium'?'md':'')+'">'+esc(x)+'</span>'}
+function empty(m){return '<div class="card" style="color:var(--mut)">'+m+' Go to <b>Documents</b> to add some.</div>'}
+var V={
+dash:function(){var r=ready();return '<h2>Dashboard</h2><p class="sub">Workspace overview · rule-based extraction</p><div class="grid"><div class="card kpi"><b>'+S.docs.length+'</b><span>Documents</span></div><div class="card kpi"><b>'+all('decisions').length+'</b><span>Decisions</span></div><div class="card kpi"><b>'+all('tasks').length+'</b><span>Tasks</span></div><div class="card kpi"><b>'+all('risks').length+'</b><span>Risks</span></div><div class="card kpi"><b>'+r.score+'</b><span>Handover readiness</span></div></div><h3 style="margin:28px 0 12px">Open gaps</h3>'+(r.gaps.length?r.gaps.slice(0,5).map(function(g){return '<div class="item">'+esc(g)+'</div>'}).join(''):'<div class="card" style="color:var(--mut)">No gaps found.</div>')},
+docs:function(){return '<h2>Documents</h2><p class="sub">Add .txt or .md files, or paste text. PDF and DOCX parsing is part of the full Django backend.</p><label class="drop" id="drop" for="fi">Drop files here or click to choose<input id="fi" type="file" accept=".txt,.md,text/plain" multiple hidden></label><div style="margin:14px 0"><input id="pn" placeholder="Name for pasted text, e.g. kickoff_notes.txt" style="margin-bottom:8px"><textarea id="pt" rows="5" placeholder="Paste meeting notes, emails or specs…"></textarea><div class="row" style="margin-top:10px"><button class="btn" id="add">Extract from text</button><button class="btn g" id="smp">Load sample documents</button></div></div><h3 style="margin:24px 0 12px">Library ('+S.docs.length+')</h3>'+(S.docs.length?S.docs.map(function(d,i){return '<div class="item"><b>'+esc(d.name)+'</b> <span class="tag ok">processed</span><div class="src">'+d.decisions.length+' decisions · '+d.tasks.length+' tasks · '+d.risks.length+' risks</div><div class="row" style="margin-top:8px"><button class="btn g" data-rm="'+i+'">Remove</button></div></div>'}).join(''):'<div class="card" style="color:var(--mut)">No documents yet.</div>')},
+ask:function(){return '<h2>AI Assistant</h2><p class="sub">Answers are pulled from your documents with sources. Method: local keyword match — no language model is used in this demo.</p><div class="chat" id="chat">'+(S.chat.length?S.chat.map(function(m){return '<div class="msg '+(m.u?'u':'')+'">'+m.h+'</div>'}).join(''):'<div class="msg">Ask a question, or try a suggestion below.</div>')+'</div><div class="row" style="margin-bottom:12px">'+['Who owns the payments audit?','What are the risks?','What did we decide about the database?'].map(function(q){return '<button class="btn g" data-sq="'+esc(q)+'">'+esc(q)+'</button>'}).join('')+'</div><form class="row" id="qf" style="flex-wrap:nowrap"><input id="q" placeholder="Ask about your documents…" aria-label="Question"><button class="btn">Ask</button></form>'},
+graph:function(){return '<h2>Knowledge Graph</h2><p class="sub">Documents, decisions, tasks and risks. Click a node to highlight its links. Drag to pan; use the buttons or wheel to zoom.</p><div class="row" style="margin-bottom:12px">'+['all','decision','task','risk'].map(function(f){return '<button class="btn '+(S.gf===f?'':'g')+'" data-gf="'+f+'">'+f+'</button>'}).join('')+'<button class="btn g" id="zi">+</button><button class="btn g" id="zo">−</button></div>'+(S.docs.length?'<svg class="gr" id="gr" viewBox="0 0 800 520"></svg><div class="card" id="gd" style="margin-top:12px;color:var(--mut)">Select a node to see details.</div>':empty('No graph yet.'))},
+dec:function(){var d=all('decisions'),t=all('tasks');return '<h2>Decisions & Tasks</h2><p class="sub">Extracted by rules from your documents.</p><h3 style="margin-bottom:12px">Decisions ('+d.length+')</h3>'+d.map(function(x){return '<div class="item"><q>'+esc(x.text)+'</q>'+(x.by?'<span class="tag ok">'+esc(x.by)+'</span>':'<span class="tag md">no decider named</span>')+'<span class="src">'+esc(x.src)+'</span></div>'}).join('')+'<h3 style="margin:24px 0 12px">Tasks ('+t.length+')</h3>'+t.map(function(x){return '<div class="item"><q>'+esc(x.text)+'</q>'+(x.owner?'<span class="tag ok">'+esc(x.owner)+'</span>':'<span class="tag md">no owner</span>')+(x.due?'<span class="tag ok">due '+esc(x.due)+'</span>':'<span class="tag md">no deadline</span>')+'<span class="src">'+esc(x.src)+'</span></div>'}).join('')||empty('Nothing extracted.')},
+risk:function(){var r=all('risks').slice().sort(function(a,b){return a.sev<b.sev?-1:1});return '<h2>Risk Analysis</h2><p class="sub">Severity is a rule-based estimate. Review before acting.</p>'+(r.length?r.map(function(x){return '<div class="item">'+tag(x.sev)+'<q>'+esc(x.text)+'</q><span class="src">'+esc(x.src)+'</span></div>'}).join(''):empty('No risks found.'))},
+hand:function(){var r=ready();return '<h2>Handover Report</h2><p class="sub">Score is calculated by code from what is documented, not guessed by a model.</p><div class="card"><div class="kpi"><b>'+r.score+'/100</b><span>Knowledge continuity score</span></div>'+Object.keys(r.c).map(function(k){return '<div style="margin-top:14px;font-size:13px;color:var(--mut)">'+k+' — '+r.c[k]+'%<div class="bar"><i style="width:'+r.c[k]+'%"></i></div></div>'}).join('')+'</div><h3 style="margin:24px 0 12px">Report</h3><pre id="rep">'+esc(report(r))+'</pre><button class="btn" id="cp">Copy report</button>'}};
+function report(r){var L=['CONTEXTBRIDGE HANDOVER REPORT','Readiness: '+r.score+'/100 (documents: '+S.docs.length+')','','OUTSTANDING GAPS ('+r.gaps.length+')'].concat(r.gaps.map(function(g){return '- '+g}));
+L.push('','CRITICAL RISKS');all('risks').filter(function(x){return x.sev==='high'}).forEach(function(x){L.push('- '+x.text+' ['+x.src+']')});
+L.push('','Method: rule-based extraction; not AI-generated.');return L.join('\n')}
+/* ---------- graph ---------- */
+function drawGraph(){var svg=$('#gr');if(!svg)return;var N=[],E=[],cx=400,cy=260;
+S.docs.forEach(function(d,i){var a=i/S.docs.length*6.283,n={id:'d'+i,t:'document',l:d.name,x:cx+Math.cos(a)*90,y:cy+Math.sin(a)*90,a:a,d:d.name};N.push(n);
+var items=[].concat(d.decisions.map(function(x){return['decision',x.text]}),d.tasks.map(function(x){return['task',x.text]}),d.risks.map(function(x){return['risk',x.text]}));
+items.forEach(function(it,j){var aa=a+(j-items.length/2)*.28,id='d'+i+'n'+j;N.push({id:id,t:it[0],l:it[1],x:cx+Math.cos(aa)*(200+(j%2)*45),y:cy+Math.sin(aa)*(170+(j%2)*35),d:d.name});E.push([n.id,id])})});
+var col={document:'#fff',decision:'#FFD600',task:'#6ee7b7',risk:'#fca5a5'};
+var by={};N.forEach(function(n){by[n.id]=n});
+var vis=function(n){return n.t==='document'||S.gf==='all'||n.t===S.gf};
+var linked=function(n){return S.sel&&(n.id===S.sel||E.some(function(e){return(e[0]===S.sel&&e[1]===n.id)||(e[1]===S.sel&&e[0]===n.id)}))};
+svg.innerHTML='<g id="vp" transform="translate('+gx+','+gy+') scale('+gz+')">'+E.filter(function(e){return vis(by[e[0]])&&vis(by[e[1]])}).map(function(e){var on=S.sel&&(e[0]===S.sel||e[1]===S.sel);return '<line x1="'+by[e[0]].x+'" y1="'+by[e[0]].y+'" x2="'+by[e[1]].x+'" y2="'+by[e[1]].y+'" stroke="'+(on?'#FFD600':'#3a3a3a')+'" stroke-width="'+(on?2:1)+'"/>'}).join('')+N.filter(vis).map(function(n){var dim=S.sel&&!linked(n);return '<circle data-n="'+n.id+'" cx="'+n.x+'" cy="'+n.y+'" r="'+(n.t==='document'?13:7)+'" fill="'+col[n.t]+'" opacity="'+(dim?.25:1)+'" style="cursor:pointer"><title>'+esc(n.t+': '+n.l)+'</title></circle>'+(n.t==='document'?'<text x="'+n.x+'" y="'+(n.y+28)+'" fill="#a3a3a3" font-size="11" text-anchor="middle">'+esc(n.l)+'</text>':'')}).join('')+'</g>';
+S.gn=by;var gd=$('#gd');if(gd)gd.innerHTML=S.sel&&by[S.sel]?'<span class="tag y">'+by[S.sel].t+'</span> '+esc(by[S.sel].l)+'<div class="src">Source: '+esc(by[S.sel].d)+'</div>':'Select a node to see details.'}
+var gx=0,gy=0,gz=1;
+/* ---------- render + events ---------- */
+function render(){var r=$('#root');if(!S.user){r.innerHTML=login();$('#lf').onsubmit=function(e){e.preventDefault();if($('#u').value.trim()==='demo'&&$('#p').value==='demo1234'){S.user='demo';S.docs=SAMPLE.map(function(s){return extract(s[0],s[1])});toast('Signed in. Sample documents loaded.');render()}else $('#er').textContent='Wrong username or password. Use demo / demo1234.'};return}
+r.innerHTML=shell(V[S.page]());
+r.querySelectorAll('[data-p]').forEach(function(b){b.onclick=function(){S.page=b.dataset.p;S.sel=null;render()}});
+$('#out').onclick=function(){S.user=null;S.chat=[];render()};
+if(S.page==='docs'){var dr=$('#drop');
+function files(fl){Array.prototype.forEach.call(fl,function(f){if(!/\.(txt|md)$/i.test(f.name)){toast(f.name+': only .txt and .md work in this demo');return}var rd=new FileReader();rd.onload=function(){S.docs.push(extract(f.name,String(rd.result)));toast('Processed '+f.name);render()};rd.onerror=function(){toast('Could not read '+f.name)};rd.readAsText(f)})}
+$('#fi').onchange=function(e){files(e.target.files)};dr.ondragover=function(e){e.preventDefault();dr.classList.add('on')};dr.ondragleave=function(){dr.classList.remove('on')};dr.ondrop=function(e){e.preventDefault();files(e.dataTransfer.files)};
+$('#add').onclick=function(){var t=$('#pt').value.trim();if(t.length<20){toast('Paste at least a sentence or two');return}S.docs.push(extract($('#pn').value.trim()||'pasted_text_'+(S.docs.length+1)+'.txt',t));toast('Processed');render()};
+$('#smp').onclick=function(){SAMPLE.forEach(function(s){if(!S.docs.some(function(d){return d.name===s[0]}))S.docs.push(extract(s[0],s[1]))});render()};
+r.querySelectorAll('[data-rm]').forEach(function(b){b.onclick=function(){S.docs.splice(+b.dataset.rm,1);render()}})}
+if(S.page==='ask'){function go(q){if(!q.trim())return;S.chat.push({u:1,h:esc(q)});
+if(!S.docs.length){S.chat.push({h:'No documents to search. Add some in Documents first.'})}else{var h=ask(q);S.chat.push({h:h.length?'<b>Closest passages in your documents</b>'+h.map(function(x){return '<q style="display:block;margin:8px 0;border-left:3px solid var(--y);padding-left:10px">'+esc(x.s)+'<div class="src">Source: '+esc(x.src)+'</div></q>'}).join('')+'<div class="src">Local keyword match — not AI-generated.</div>':'I couldn’t find anything about that in your documents. Try different words, or add the relevant document.'})}render();var c=$('#chat');c.lastElementChild.scrollIntoView({block:'nearest'})}
+$('#qf').onsubmit=function(e){e.preventDefault();go($('#q').value)};r.querySelectorAll('[data-sq]').forEach(function(b){b.onclick=function(){go(b.dataset.sq)}})}
+if(S.page==='graph'){r.querySelectorAll('[data-gf]').forEach(function(b){b.onclick=function(){S.gf=b.dataset.gf;render()}});
+if(S.docs.length){var sv=$('#gr');drawGraph();sv.onclick=function(e){var n=e.target.dataset&&e.target.dataset.n;if(n){S.sel=S.sel===n?null:n;drawGraph()}};
+var dn=null;sv.onpointerdown=function(e){if(!e.target.dataset.n){dn=[e.clientX,e.clientY,gx,gy];sv.setPointerCapture(e.pointerId)}};sv.onpointermove=function(e){if(dn){gx=dn[2]+(e.clientX-dn[0]);gy=dn[3]+(e.clientY-dn[1]);$('#vp').setAttribute('transform','translate('+gx+','+gy+') scale('+gz+')')}};sv.onpointerup=function(){dn=null};
+sv.onwheel=function(e){e.preventDefault();gz=Math.max(.4,Math.min(3,gz*(e.deltaY<0?1.1:.9)));drawGraph()};
+$('#zi').onclick=function(){gz=Math.min(3,gz*1.2);drawGraph()};$('#zo').onclick=function(){gz=Math.max(.4,gz/1.2);drawGraph()}}}
+if(S.page==='hand'){$('#cp').onclick=function(){var t=$('#rep').textContent;try{navigator.clipboard.writeText(t).then(function(){toast('Report copied')},function(){sel()})}catch(e){sel()}function sel(){var g=document.createRange();g.selectNodeContents($('#rep'));var s=getSelection();s.removeAllRanges();s.addRange(g);toast('Selected. Press Ctrl+C to copy')}}}}
+render();
+window.__cb={S:S,extract:extract,ready:ready,ask:ask};
+})();
+</script></body></html>
